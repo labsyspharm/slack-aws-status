@@ -89,7 +89,7 @@ def read_slack_token(fname=None):
     return token
 
 
-def send_message(channel, fname):
+def send_message(channel, fname, title):
     token = read_slack_token()
     sc = SlackClient(token)
     sc.api_call('files.upload',
@@ -97,6 +97,7 @@ def send_message(channel, fname):
                 filename=fname,
                 filetype='png',
                 file=open(fname, 'rb'),
+                title=title,
                 text='Cost report')
 
 
@@ -104,4 +105,5 @@ if __name__ == '__main__':
     #fname = make_plot(datetime.datetime(2019, 1, 1),
     #                  datetime.datetime(2019, 12, 31))
     fname = save_plot()
-    send_message('C3V69UYAC', fname)
+    title = pandas.Timestamp.today().strftime('%Y-%m-%d')
+    send_message('C3V69UYAC', fname, title)
