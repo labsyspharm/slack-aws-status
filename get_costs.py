@@ -1,10 +1,10 @@
-import matplotlib
+import os
+import io
 import boto3
 import pandas
 import matplotlib
 import matplotlib.pyplot as plt
-from slackclient import SlackClient
-import tempfile
+import slack_sdk
 
 
 # Number of days in rolling window for median calculation.
@@ -75,35 +75,25 @@ def make_plot(start_date=None, end_date=None):
 
 def save_plot():
     fig = make_plot()
-    temp = tempfile.NamedTemporaryFile(suffix='.png', delete=False)
-    fig.savefig(temp.name)
-    return temp.name
+    bio = io.BytesIO()
+    fig.savefig(bio)
+    bio.seek(0)
+    return bio
 
 
-def read_slack_token(fname=None):
-    # Token can be found at https://api.slack.com/web#authentication
-    if fname is None:
-        fname = 'indrabot_slack_token'
-    with open(fname, 'rt') as fh:
-        token = fh.read().strip()
-    return token
-
-
-def send_message(channel, fname, title):
-    token = read_slack_token()
-    sc = SlackClient(token)
-    sc.api_call('files.upload',
-                channels=channel,
-                filename=fname,
-                filetype='png',
-                file=open(fname, 'rb'),
-                title=title,
-                text='Cost report')
+def send_message(channel, upload_file, filename):
+    token = os.environ["SLACK_APP_TOKEN"]
+    client = slack_sdk.WebClient(token=token)
+    client.files_upload_v2(
+        file=upload_file,
+        filename=filename,
+        channel=channel,
+    )
 
 
 if __name__ == '__main__':
     #fname = make_plot(datetime.datetime(2019, 1, 1),
     #                  datetime.datetime(2019, 12, 31))
-    fname = save_plot()
-    title = pandas.Timestamp.today().strftime('%Y-%m-%d')
-    send_message('C3V69UYAC', fname, title)
+    upload_file = save_plot()
+    title = pandas.Timestamp.today().strftime('usage_%Y%m%d.png')
+    send_message('C3V69UYAC', upload_file, title)
