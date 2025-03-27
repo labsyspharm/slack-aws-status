@@ -10,6 +10,7 @@ import slack_sdk
 # Number of days in rolling window for median calculation.
 WINDOW_LENGTH = 30
 
+matplotlib.use("agg")
 cmap = matplotlib.colors.ListedColormap(matplotlib.colormaps['turbo_r'].colors[30:-30])
 
 def make_plot(start_date=None, end_date=None):
