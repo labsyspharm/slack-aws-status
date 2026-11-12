@@ -1,3 +1,12 @@
+# /// script
+# dependencies = [
+#     "boto3",
+#     "matplotlib",
+#     "pandas",
+#     "slack_sdk",
+# ]
+# ///
+
 import os
 import io
 import boto3
@@ -16,7 +25,7 @@ cmap = matplotlib.colors.ListedColormap(matplotlib.colormaps['turbo_r'].colors[3
 def make_plot(start_date=None, end_date=None):
     if end_date is None:
         # Get today's date
-        end_date = pandas.Timestamp.today().floor('d')
+        end_date = pandas.Timestamp.today().floor('D')
     if start_date is None:
         # Get today - 7 days
         start_date = end_date - pandas.Timedelta(days=7)
